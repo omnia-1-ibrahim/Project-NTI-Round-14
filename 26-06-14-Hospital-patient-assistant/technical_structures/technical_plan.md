@@ -29,8 +29,8 @@ The system relies on a highly decoupled architecture, ensuring that the AI reaso
 
 The system is powered by 8 specialized LLM-driven agents working in an assembly-line fashion.
 
-1. **Supervisor Agent**: The orchestrator. Analyzes intent (NLU), language (AR/EN), and routes the task using an Intent Classifier.
-2. **Patient Onboarding Agent**: Builds structured profiles for new patients conversationally and extracts required FHIR fields.
+1. **Supervisor Agent**: The orchestrator. Analyzes intent (NLU), language (AR/EN), and routes the task.
+2. **Patient Onboarding Agent**: Builds structured profiles for new patients conversationally.
 3. **Identity Verification Agent**: Performs fuzzy matching (Name/DOB/Phone) against EMR records to prevent duplicates.
 4. **Missing Data Handler**: Uses dynamic schema validation to generate minimal targeted prompts for missing required fields.
 5. **Triage Agent (4 Sub-agent Pipeline)**: 
@@ -41,6 +41,16 @@ The system is powered by 8 specialized LLM-driven agents working in an assembly-
 6. **Scheduling Agent**: Interprets temporal intents and matches them against EMR slot availability logic.
 7. **Care Coordinator Agent**: Generates contextual follow-up messages and manages NPS survey processing.
 8. **Human Handoff Agent**: Summarizes the entire context window into a structured, high-density clinical alert for the receptionist.
+
+### 2.1 Agent Toolsets (Custom AI Tools)
+To execute their tasks, these agents will be equipped with the following custom tools (Functions/APIs):
+- `SearchEMRTool`: Queries the HL7 FHIR API to find existing patient records (used by Identity Agent).
+- `CreatePatientProfileTool`: Sends a POST request to create a new FHIR Patient resource (used by Onboarding Agent).
+- `ValidateSymptomsTool`: Checks if the reported symptoms contain enough context for triage.
+- `CheckAvailabilityTool`: Queries the EMR calendar for open slots in a specific department (used by Scheduling Agent).
+- `BookAppointmentTool`: Writes a confirmed appointment to the FHIR EMR (used by Scheduling Agent).
+- `SendWhatsAppTool`: Triggers the WhatsApp Business API to send confirmations or follow-ups.
+- `TriggerDashboardAlertTool`: Emits a WebSocket/SSE alert to the receptionist dashboard (used by Human Handoff Agent).
 
 ---
 
