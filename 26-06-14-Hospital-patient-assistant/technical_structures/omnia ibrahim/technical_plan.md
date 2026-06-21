@@ -7,11 +7,13 @@
 
 ## 1. System Architecture & Core Layers
 
+![Technical Architecture Diagram](assets/technical_architecture_diagram.svg)
+
 The system relies on a highly decoupled architecture, ensuring that the AI reasoning layers are safely integrated with traditional software infrastructure.
 
 ### 1.1 Communication Layer (Interfaces)
-- **WhatsApp Integration**: Using WhatsApp Business API (e.g., via Meta or Twilio) for bilingual (Arabic/English) text conversations.
-- **Voice Gateway**: Interactive Voice Response (IVR) integrated with STT/TTS for elderly patients.
+- **WhatsApp / Messaging Integration**: Using unofficial libraries (e.g., `whatsapp-web.js` أو `Baileys`) or Telegram Bot API for 100% free bilingual (Arabic/English) text conversations.
+- **Voice Gateway**: Open-source Interactive Voice Response (IVR) like Asterisk or FreeSWITCH integrated with local STT/TTS for elderly patients.
 - **Website Widget**: A custom React/Vanilla JS chat interface via WebSockets.
 - **Receptionist Dashboard**: A secure internal web dashboard (React/Next.js) receiving real-time clinical alerts via SSE.
 
@@ -20,7 +22,7 @@ The system relies on a highly decoupled architecture, ensuring that the AI reaso
 - **State Store**: **Redis** for managing active conversation state and short-term memory, and **PostgreSQL** for session persistence.
 
 ### 1.3 Integration Layer (Data Exchange)
-- **EMR/EHR System**: Deep integration via **HL7 FHIR API** to read patient profiles and write appointments.
+- **EMR/EHR System**: Deep integration via **HAPI FHIR API** (Open-source FHIR server) to read patient profiles and write appointments.
 - **Loyalty & Analytics DB**: An internal database tracking points, referrals, and NPS survey results.
 
 ---
@@ -44,12 +46,12 @@ The system is powered by 8 specialized LLM-driven agents working in an assembly-
 
 ### 2.1 Agent Toolsets (Custom AI Tools)
 To execute their tasks, these agents will be equipped with the following custom tools (Functions/APIs):
-- `SearchEMRTool`: Queries the HL7 FHIR API to find existing patient records (used by Identity Agent).
+- `SearchEMRTool`: Queries the HAPI FHIR API to find existing patient records (used by Identity Agent).
 - `CreatePatientProfileTool`: Sends a POST request to create a new FHIR Patient resource (used by Onboarding Agent).
 - `ValidateSymptomsTool`: Checks if the reported symptoms contain enough context for triage.
 - `CheckAvailabilityTool`: Queries the EMR calendar for open slots in a specific department (used by Scheduling Agent).
 - `BookAppointmentTool`: Writes a confirmed appointment to the FHIR EMR (used by Scheduling Agent).
-- `SendWhatsAppTool`: Triggers the WhatsApp Business API to send confirmations or follow-ups.
+- `SendMessageTool`: Triggers the unofficial WhatsApp API or Telegram Bot to send confirmations or follow-ups.
 - `TriggerDashboardAlertTool`: Emits a WebSocket/SSE alert to the receptionist dashboard (used by Human Handoff Agent).
 
 ---
@@ -79,18 +81,20 @@ This layer governs how the agents "think," remember, and behave safely.
 
 ## 4. Comprehensive Technology Stack
 
-| Category | Recommended Technologies |
+![Comprehensive System Stack](assets/comprehensive_system_stack.svg)
+
+| Category | Recommended Technologies (100% Free / Open Source) |
 | :--- | :--- |
-| **AI & LLM Provider** | OpenAI (GPT-4o) or Anthropic (Claude 3.5 Sonnet) |
-| **Speech Models (STT/TTS)** | OpenAI Whisper, Google Cloud Speech-to-Text |
-| **AI Observability** | LangSmith or Phoenix (Tracing & debugging) |
+| **AI & LLM Provider** | Llama 3, Qwen, or Mistral (Self-hosted locally via Ollama / vLLM) |
+| **Speech Models (STT/TTS)** | Local OpenAI Whisper (`whisper.cpp`), Piper, or Edge-TTS |
+| **AI Observability** | Langfuse (Self-hosted) or Phoenix (Open-source version) |
 | **Agent Orchestration** | LangChain / LangGraph (Python or TypeScript) |
 | **Backend API Framework** | FastAPI (Python) or NestJS (Node.js) |
 | **Frontend Framework** | React.js / Next.js with TailwindCSS (Dashboard) |
-| **Databases** | PostgreSQL (Relational) + Redis (Cache/State) |
-| **Integration Standards** | HL7 FHIR (Smile CDR, GCP Healthcare API, Direct client) |
-| **Cloud Infrastructure** | AWS, Azure, or GCP (HIPAA-compliant instances) |
-| **DevOps & CI/CD** | GitHub Actions / GitLab CI, Datadog / ELK Stack |
+| **Databases** | PostgreSQL (Relational) + Redis (Cache/State) - Self-hosted |
+| **Integration Standards** | HAPI FHIR (Open-source Java FHIR server) |
+| **Infrastructure** | On-Premise Servers (Self-hosted locally) |
+| **DevOps & CI/CD** | Self-hosted GitLab CI/CD, Prometheus + Grafana (Monitoring) |
 
 ---
 
@@ -103,7 +107,7 @@ This layer governs how the agents "think," remember, and behave safely.
 2. **Data Minimization**: Strictly isolating and stripping irrelevant PHI before it reaches the LLM context window.
 3. **Audit Trails**: Every LLM decision, EMR API call, and human escalation is logged securely with a timestamp.
 4. **Access Control (RBAC)**: Multi-Factor Authentication (MFA) and strict role bounds for the dashboard.
-5. **Cloud BAA**: Business Associate Agreements (BAA) signed with cloud and LLM providers.
+5. **Data Sovereignty**: 100% local processing with self-hosted LLMs and databases ensures no PHI leaves the hospital's internal network.
 
 ---
 
@@ -115,7 +119,7 @@ This layer governs how the agents "think," remember, and behave safely.
 
 ### Phase 1B: Booking & Live EMR (Months 3–4)
 - **Focus**: End-to-end self-scheduling.
-- **Features**: Scheduling Agent, live HL7 FHIR read/write integration, temporal logic validation.
+- **Features**: Scheduling Agent, live HAPI FHIR read/write integration, temporal logic validation.
 
 ### Phase 1C: Retention (Months 5–6)
 - **Focus**: Patient follow-up and feedback.
