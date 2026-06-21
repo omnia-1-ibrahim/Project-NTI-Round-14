@@ -42,7 +42,7 @@ To avoid LLM context bloat and hallucination when dealing with extensive EMR his
 > The system operates in a high-risk clinical environment. Absolute guardrails are required.
 
 - **Clinical Boundary Enforcement**: The LLM is instructed to reject any request for medical advice, prescriptions, or diagnosis, outputting a standardized fallback response.
-- **Output Validation**: Responses from the Triage and Scheduling agents pass through an output parser (e.g., Pydantic) to ensure they conform perfectly to the required JSON structure before making EMR API calls.
+- **Output Validation**: Responses from the Triage and Scheduling agents pass through an output parser (e.g., structured output schema validation) to ensure they conform perfectly to the required JSON structure before making EMR API calls.
 - **Hallucination Mitigation**: Grounding the LLM strictly in the retrieved FHIR data (RAG approach). If an answer isn't in the provided context, the model must output "I don't know."
 
 ---
